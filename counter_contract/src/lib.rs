@@ -1,9 +1,35 @@
-use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, pubkey::Pubkey};
+use borsh::{BorshDeserialize, BorshSerialize};
+use solana_program::{
+    account_info::{AccountInfo, next_account_info},
+    entrypoint,
+    entrypoint::ProgramResult,
+    pubkey::Pubkey,
+};
+
+#[derive(BorshSerialize, BorshDeserialize)]
+struct Counter {
+    count: u32,
+}
+
+entrypoint!(process_instruction);
 
 pub fn process_instruction(
-    program_Id:&Pubkey,
-    account_info:&[AccountInfo],
-    instruction_data:&[u8]
-)->ProgramResult{
-    
+    program_Id: &Pubkey,
+    account_info: &[AccountInfo],
+    instruction_data: &[u8],
+) -> ProgramResult {
+    let mut iter = account_info.iter();
+    let data_account = next_account_info(&mut iter)?;
+
+    let mut counter = Counter::try_from_slice(&mut data_account.data.borrow_mut())?;
+
+    if counter.count == 0 {
+        counter.count = 1;
+    } else {
+        counter.count = counter.count * 2;
+    }
+
+    counter.serialize(&mut *data_account.data.borrow_mut());
+
+    Ok(())
 }
