@@ -21,7 +21,7 @@ pub fn process_instruction(
     let instruction = Instruction {
         program_id: *double_contract_address.key,
         accounts: vec![AccountMeta {
-            is_signer: true,
+            is_signer: false,
             is_writable: true,
             pubkey: *data_accounts.key,
         }], 
